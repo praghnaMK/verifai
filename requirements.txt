@@ -1,0 +1,30 @@
+# VerifAI dependencies
+# Install: pip install -r requirements.txt
+
+# LLM — Groq (free, fast)
+groq>=0.9.0
+
+# Embeddings — local, no API key needed
+sentence-transformers>=3.0.0
+
+# Retrieval
+faiss-cpu>=1.7.4
+rank-bm25>=0.2.2
+numpy>=1.26.0
+
+# Document parsing
+pymupdf>=1.23.0          # PDF extraction
+
+# API
+fastapi>=0.110.0
+uvicorn[standard]>=0.27.0
+python-multipart>=0.0.9
+pydantic>=2.0.0
+
+# Dashboard
+streamlit>=1.32.0
+plotly>=5.18.0
+requests>=2.31.0
+
+# Utilities
+python-dotenv>=1.0.0

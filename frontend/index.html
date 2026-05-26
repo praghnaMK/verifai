@@ -1,0 +1,731 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>VerifAI</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:        #f5f5fa;
+  --bg1:       #ffffff;
+  --bg2:       #f0f0f6;
+  --bg3:       #e5e5ee;
+  --border:    rgba(0,0,0,0.08);
+  --border2:   rgba(0,0,0,0.13);
+  --text:      #0f0f1a;
+  --text2:     #3a3a55;
+  --text3:     #7a7a95;
+  --accent:    #6c5ce7;
+  --accent2:   #5a4ad1;
+  --yellow:    #c28000;
+  --green:     #1a8a55;
+  --red:       #c8293a;
+  --orange:    #b85a10;
+  --purple-glow: rgba(108,92,231,0.08);
+}
+
+html,body{height:100%;overflow:hidden}
+
+body{
+  font-family:'Inter',sans-serif;
+  background:var(--bg);
+  color:var(--text);
+  display:flex;
+  font-size:13px;
+  line-height:1.5;
+}
+
+/* ── LAYOUT ── */
+.layout{flex:1;display:flex;overflow:hidden;}
+
+/* ── LEFT PANEL ── */
+.left-panel{
+  width:280px;flex-shrink:0;
+  background:var(--bg1);
+  border-right:1px solid var(--border);
+  display:flex;flex-direction:column;
+  overflow:hidden;
+}
+.panel-header{
+  padding:20px 20px 16px;
+  border-bottom:1px solid var(--border);
+}
+.panel-title{font-size:16px;font-weight:600;color:var(--text);margin-bottom:2px;}
+.panel-sub{font-size:11px;color:var(--text3);}
+
+/* Status cards */
+.status-cards{padding:14px 14px 0;display:flex;flex-direction:column;gap:8px;}
+.status-card{
+  border-radius:10px;padding:12px 14px;
+  border:1px solid var(--border);
+  background:var(--bg2);
+}
+.status-card.connected{border-color:rgba(26,138,85,0.25);background:rgba(26,138,85,0.06);}
+.status-card.indexed  {border-color:rgba(108,92,231,0.25);background:rgba(108,92,231,0.06);}
+.status-card.error    {border-color:rgba(200,41,58,0.25); background:rgba(200,41,58,0.06);}
+.sc-top{display:flex;align-items:center;gap:8px;margin-bottom:3px;}
+.sc-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0;}
+.sc-dot.green {background:var(--green);box-shadow:0 0 6px rgba(26,138,85,0.5);}
+.sc-dot.purple{background:var(--accent);}
+.sc-dot.red   {background:var(--red);}
+.sc-label{font-size:12px;font-weight:500;}
+.sc-sub{font-size:11px;color:var(--text3);}
+
+/* Upload */
+.upload-section{padding:14px;}
+.upload-label{font-size:10px;font-weight:600;color:var(--text3);letter-spacing:0.08em;text-transform:uppercase;margin-bottom:8px;}
+.upload-zone{
+  border:1px dashed rgba(108,92,231,0.35);
+  border-radius:10px;padding:16px;text-align:center;
+  cursor:pointer;transition:all 0.2s;
+  background:rgba(108,92,231,0.04);
+}
+.upload-zone:hover{border-color:rgba(108,92,231,0.6);background:rgba(108,92,231,0.08);}
+.upload-zone input{display:none;}
+.upload-zone svg{width:20px;height:20px;stroke:var(--accent);fill:none;stroke-width:1.5;margin:0 auto 6px;display:block;}
+.upload-zone p{font-size:11px;color:var(--text3);line-height:1.5;}
+.upload-zone span{font-size:12px;color:var(--accent);font-weight:500;}
+.doc-item{
+  display:flex;align-items:center;gap:8px;
+  padding:8px 10px;border-radius:8px;
+  background:var(--bg2);border:1px solid var(--border);
+  margin-top:6px;
+}
+.doc-item svg{width:14px;height:14px;stroke:var(--accent);fill:none;stroke-width:1.6;flex-shrink:0;}
+.doc-item span{font-size:11px;color:var(--text2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+
+/* Nav */
+.nav-section{padding:0 14px;flex:1;}
+.nav-lbl{font-size:10px;font-weight:600;color:var(--text3);letter-spacing:0.08em;text-transform:uppercase;padding:0 6px;margin:14px 0 6px;}
+.nav-item{
+  display:flex;align-items:center;gap:10px;
+  padding:9px 10px;border-radius:8px;
+  font-size:13px;color:var(--text2);cursor:pointer;
+  transition:all 0.15s;
+  border:1px solid transparent;
+}
+.nav-item:hover{background:var(--bg2);color:var(--text);}
+.nav-item.active{
+  background:var(--purple-glow);
+  border-color:rgba(108,92,231,0.2);
+  color:var(--accent);font-weight:500;
+}
+.nav-item svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0;}
+
+.sidebar-foot{
+  padding:14px;border-top:1px solid var(--border);
+  font-size:10px;color:var(--text3);line-height:1.6;
+}
+.sidebar-foot strong{color:var(--accent);}
+
+/* ── MAIN ── */
+.main{flex:1;display:flex;flex-direction:column;overflow:hidden;background:var(--bg);}
+
+.topbar{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:0 28px;height:56px;
+  border-bottom:1px solid var(--border);
+  background:var(--bg1);flex-shrink:0;
+}
+.topbar-title{font-size:16px;font-weight:600;color:var(--text);}
+.topbar-right{display:flex;align-items:center;gap:12px;}
+.model-tag{
+  display:flex;align-items:center;gap:6px;
+  background:var(--bg2);border:1px solid var(--border2);
+  border-radius:20px;padding:5px 12px;
+  font-size:11px;color:var(--text2);font-weight:500;
+}
+.model-dot{width:6px;height:6px;border-radius:50%;background:var(--green);box-shadow:0 0 6px rgba(26,138,85,0.5);}
+.user-chip{display:flex;align-items:center;gap:8px;}
+.user-info-text .name{font-size:12px;font-weight:500;color:var(--text);text-align:right;}
+.user-info-text .email{font-size:10px;color:var(--text3);}
+.avatar{width:30px;height:30px;border-radius:50%;background:linear-gradient(135deg,var(--accent),#c084fc);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:white;}
+
+/* ── CONTENT AREA ── */
+.content{flex:1;display:flex;flex-direction:column;overflow:hidden;}
+
+/* Metrics bar */
+.metrics-bar{
+  display:flex;gap:1px;
+  border-bottom:1px solid var(--border);
+  flex-shrink:0;background:var(--border);
+}
+.metric-cell{
+  flex:1;padding:16px 20px;
+  background:var(--bg1);
+  display:flex;flex-direction:column;gap:2px;
+}
+.metric-val{
+  font-size:22px;font-weight:700;
+  font-family:'JetBrains Mono',monospace;
+  color:var(--text);
+}
+.metric-val.green {color:var(--green);}
+.metric-val.yellow{color:var(--yellow);}
+.metric-val.purple{color:var(--accent);}
+.metric-val.red   {color:var(--red);}
+.metric-label{font-size:10px;color:var(--text3);font-weight:500;letter-spacing:0.05em;text-transform:uppercase;}
+.metric-sub{font-size:10px;color:var(--text3);}
+
+/* Quick actions */
+.quick-row{
+  display:flex;gap:1px;background:var(--border);
+  border-bottom:1px solid var(--border);flex-shrink:0;
+}
+.quick-card{
+  flex:1;padding:14px 18px;background:var(--bg1);
+  cursor:pointer;transition:all 0.15s;
+  border-top:2px solid transparent;
+}
+.quick-card:hover{background:var(--bg2);border-top-color:var(--accent);}
+.quick-card-top{display:flex;align-items:center;gap:8px;margin-bottom:4px;}
+.quick-card-top svg{width:14px;height:14px;stroke:var(--accent);fill:none;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round;}
+.quick-card h4{font-size:12px;font-weight:600;color:var(--text);}
+.quick-card p{font-size:11px;color:var(--text3);line-height:1.4;}
+
+/* Result scroll area */
+.result-scroll{flex:1;overflow-y:auto;padding:20px 28px;}
+.result-scroll::-webkit-scrollbar{width:4px;}
+.result-scroll::-webkit-scrollbar-track{background:transparent;}
+.result-scroll::-webkit-scrollbar-thumb{background:var(--bg3);border-radius:2px;}
+
+/* Empty state */
+.empty-state{
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  height:100%;color:var(--text3);gap:12px;
+}
+.empty-state svg{width:40px;height:40px;stroke:var(--text3);fill:none;stroke-width:1;opacity:0.4;}
+.empty-state p{font-size:13px;text-align:center;line-height:1.7;max-width:260px;}
+
+/* Answer card */
+.answer-card{
+  background:var(--bg1);border:1px solid var(--border);
+  border-radius:14px;padding:20px;margin-bottom:14px;
+}
+.answer-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;}
+.answer-title{font-size:13px;font-weight:600;color:var(--text);}
+.answer-meta{display:flex;align-items:center;gap:8px;}
+.badge{font-size:10px;font-weight:600;padding:3px 10px;border-radius:20px;letter-spacing:0.03em;}
+.badge.reliable  {background:rgba(26,138,85,0.1);color:var(--green);border:1px solid rgba(26,138,85,0.25);}
+.badge.unreliable{background:rgba(200,41,58,0.1);color:var(--red);  border:1px solid rgba(200,41,58,0.25);}
+.badge.refused   {background:rgba(184,90,16,0.1);color:var(--orange);border:1px solid rgba(184,90,16,0.25);}
+
+.score-pill{
+  display:flex;align-items:center;gap:6px;
+  background:var(--bg2);border:1px solid var(--border);
+  border-radius:20px;padding:4px 10px;
+}
+.score-bar{width:60px;height:4px;background:var(--bg3);border-radius:2px;overflow:hidden;}
+.score-fill{height:100%;border-radius:2px;transition:width 0.8s ease;}
+.score-fill.high  {background:linear-gradient(90deg,var(--green),#34c97a);}
+.score-fill.medium{background:linear-gradient(90deg,var(--yellow),#e8a800);}
+.score-fill.low   {background:linear-gradient(90deg,var(--red),#e85060);}
+.score-text{font-size:11px;font-weight:600;font-family:'JetBrains Mono',monospace;}
+.score-text.high  {color:var(--green);}
+.score-text.medium{color:var(--yellow);}
+.score-text.low   {color:var(--red);}
+
+.answer-body{font-size:13px;color:var(--text2);line-height:1.75;margin-bottom:16px;}
+
+.claims-title{font-size:10px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:8px;}
+.claim{
+  display:flex;align-items:flex-start;gap:10px;
+  padding:9px 12px;border-radius:8px;
+  margin-bottom:5px;font-size:12px;line-height:1.5;
+  border-left:3px solid transparent;
+}
+.claim.grounded  {background:rgba(26,138,85,0.07);border-left-color:var(--green);color:#0b5e35;}
+.claim.ungrounded{background:rgba(200,41,58,0.07);border-left-color:var(--red);  color:#7a0014;}
+.claim.uncertain {background:rgba(184,90,16,0.07);border-left-color:var(--orange);color:#6b3500;}
+.claim-icon{flex-shrink:0;margin-top:1px;}
+.claim-icon svg{width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:2;}
+.claim-grounded-icon  {color:var(--green);}
+.claim-ungrounded-icon{color:var(--red);}
+.claim-uncertain-icon {color:var(--orange);}
+.claim-support{font-size:10px;opacity:0.7;margin-top:3px;font-style:italic;}
+
+/* Sources table */
+.sources-section{margin-top:16px;}
+.sources-header{
+  display:flex;align-items:center;justify-content:space-between;
+  margin-bottom:10px;
+}
+.sources-title-txt{font-size:10px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:0.08em;}
+.sources-table{border:1px solid var(--border);border-radius:10px;overflow:hidden;}
+.sources-thead{
+  display:grid;grid-template-columns:2fr 1fr 1fr 3fr;
+  background:var(--bg2);padding:8px 14px;
+  font-size:10px;font-weight:600;color:var(--text3);
+  letter-spacing:0.06em;text-transform:uppercase;border-bottom:1px solid var(--border);
+}
+.source-row{
+  display:grid;grid-template-columns:2fr 1fr 1fr 3fr;
+  padding:10px 14px;border-bottom:1px solid var(--border);
+  font-size:11px;align-items:start;
+  transition:background 0.12s;
+}
+.source-row:last-child{border-bottom:none;}
+.source-row:hover{background:var(--bg2);}
+.source-doc{color:var(--text);font-weight:500;font-family:'JetBrains Mono',monospace;font-size:10px;}
+.source-page{color:var(--text3);}
+.source-score{font-family:'JetBrains Mono',monospace;font-weight:600;font-size:11px;}
+.source-preview{color:var(--text3);line-height:1.4;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;}
+
+/* Refused box */
+.refused-box{
+  background:rgba(184,90,16,0.06);border:1px solid rgba(184,90,16,0.2);
+  border-radius:14px;padding:20px;margin-bottom:14px;
+}
+.refused-title{font-size:14px;font-weight:600;color:var(--orange);margin-bottom:6px;display:flex;align-items:center;gap:8px;}
+.refused-title svg{width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:2;}
+.refused-body{font-size:13px;color:var(--text2);line-height:1.7;}
+
+/* Warning */
+.warning-bar{
+  background:rgba(184,90,16,0.06);border:1px solid rgba(184,90,16,0.15);
+  border-radius:8px;padding:10px 14px;margin-bottom:14px;
+  font-size:12px;color:var(--orange);line-height:1.6;
+  display:flex;gap:8px;align-items:flex-start;
+}
+.warning-bar svg{width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2;flex-shrink:0;margin-top:1px;}
+
+/* Loading */
+.loading-card{
+  background:var(--bg1);border:1px solid var(--border);border-radius:14px;
+  padding:32px;text-align:center;margin-bottom:14px;
+}
+.spinner{
+  width:28px;height:28px;border:2px solid rgba(108,92,231,0.15);
+  border-top-color:var(--accent);border-radius:50%;
+  animation:spin 0.8s linear infinite;margin:0 auto 12px;
+}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* ── INPUT ── */
+.input-section{
+  padding:16px 28px 20px;
+  border-top:1px solid var(--border);
+  background:var(--bg1);flex-shrink:0;
+}
+.doc-chip{
+  font-size:11px;color:var(--accent);
+  background:rgba(108,92,231,0.08);
+  padding:4px 10px;border-radius:6px;
+  border:1px solid rgba(108,92,231,0.2);
+  display:flex;align-items:center;gap:5px;
+}
+.doc-chip svg{width:11px;height:11px;stroke:currentColor;fill:none;stroke-width:1.8;}
+
+.input-wrap{
+  display:flex;align-items:center;gap:10px;
+  background:var(--bg2);border:1px solid var(--border2);
+  border-radius:10px;padding:10px 14px;
+  transition:all 0.2s;
+}
+.input-wrap:focus-within{
+  border-color:rgba(108,92,231,0.45);
+  box-shadow:0 0 0 3px rgba(108,92,231,0.08);
+}
+.input-wrap input{
+  flex:1;border:none;background:transparent;
+  font-family:'Inter',sans-serif;font-size:13px;
+  color:var(--text);outline:none;
+}
+.input-wrap input::placeholder{color:var(--text3);}
+.send-btn{
+  width:32px;height:32px;border-radius:8px;
+  background:var(--accent);border:none;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+  color:white;transition:all 0.2s;flex-shrink:0;
+  box-shadow:0 2px 10px rgba(108,92,231,0.25);
+}
+.send-btn:hover{background:var(--accent2);transform:translateY(-1px);}
+.send-btn:disabled{opacity:0.4;cursor:not-allowed;transform:none;}
+.send-btn svg{width:15px;height:15px;stroke:white;fill:none;stroke-width:2.5;stroke-linecap:round;}
+.input-hint{text-align:center;font-size:10px;color:var(--text3);margin-top:8px;}
+</style>
+</head>
+<body>
+
+<div class="layout">
+  <!-- LEFT PANEL -->
+  <div class="left-panel">
+    <div class="panel-header">
+      <div class="panel-title">VerifAI</div>
+      <div class="panel-sub">Self-verifying RAG engine</div>
+    </div>
+
+    <div class="status-cards">
+      <div id="api-card" class="status-card error">
+        <div class="sc-top">
+          <div class="sc-dot red" id="api-dot"></div>
+          <span class="sc-label" id="api-label">Checking API...</span>
+        </div>
+        <div class="sc-sub" id="api-sub">localhost:8000</div>
+      </div>
+      <div id="index-card" class="status-card indexed" style="display:none;">
+        <div class="sc-top">
+          <div class="sc-dot purple"></div>
+          <span class="sc-label" id="index-label">Index ready</span>
+        </div>
+        <div class="sc-sub" id="index-sub">—</div>
+      </div>
+    </div>
+
+    <div class="upload-section">
+      <div class="upload-label">Document</div>
+      <div class="upload-zone" onclick="document.getElementById('file-input').click()">
+        <svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+        <span>Upload document</span>
+        <p>PDF, TXT, MD · max 200 MB</p>
+        <input type="file" id="file-input" accept=".pdf,.txt,.md" onchange="uploadFile(this)">
+      </div>
+      <div id="doc-list"></div>
+    </div>
+
+    <div class="nav-section">
+      <div class="nav-lbl">Navigation</div>
+      <div class="nav-item active">
+        <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        Query
+      </div>
+    </div>
+
+    <div class="sidebar-foot">
+      VerifAI v1.0 &nbsp;·&nbsp; Groq llama-3.3-70b<br>
+      BM25 + FAISS + RRF retrieval<br>
+      Built by <strong>Praghna M.K</strong>
+    </div>
+  </div>
+
+  <!-- MAIN -->
+  <div class="main">
+    <!-- Topbar -->
+    <div class="topbar">
+      <div class="topbar-title">Query Interface</div>
+      <div class="topbar-right">
+        <div class="model-tag">
+          <div class="model-dot"></div>
+          llama-3.3-70b &nbsp;·&nbsp; Groq
+        </div>
+        <div class="user-chip">
+          <div class="user-info-text">
+            <div class="name">Praghna M.K</div>
+            <div class="email">praghnamk22@gmail.com</div>
+          </div>
+          <div class="avatar">P</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Content -->
+    <div class="content">
+      <!-- Metrics -->
+      <div class="metrics-bar">
+        <div class="metric-cell">
+          <div class="metric-val green" id="m-score">—</div>
+          <div class="metric-label">Grounding Score</div>
+          <div class="metric-sub">claim-level verification</div>
+        </div>
+        <div class="metric-cell">
+          <div class="metric-val purple" id="m-claims">—</div>
+          <div class="metric-label">Claims Verified</div>
+          <div class="metric-sub">per answer</div>
+        </div>
+        <div class="metric-cell">
+          <div class="metric-val yellow" id="m-grounded">—</div>
+          <div class="metric-label">Grounded</div>
+          <div class="metric-sub">source-backed claims</div>
+        </div>
+        <div class="metric-cell">
+          <div class="metric-val" id="m-latency">—</div>
+          <div class="metric-label">Latency</div>
+          <div class="metric-sub">retrieve + generate + verify</div>
+        </div>
+      </div>
+
+      <!-- Quick actions -->
+      <div class="quick-row">
+        <div class="quick-card" onclick="ask('What are the key skills mentioned in this document?')">
+          <div class="quick-card-top">
+            <svg viewBox="0 0 24 24"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+            <h4>Skills extraction</h4>
+          </div>
+          <p>Extract and verify all technical skills</p>
+        </div>
+        <div class="quick-card" onclick="ask('What projects are described and what technologies were used?')">
+          <div class="quick-card-top">
+            <svg viewBox="0 0 24 24"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg>
+            <h4>Project analysis</h4>
+          </div>
+          <p>Verify project descriptions and tech stack</p>
+        </div>
+        <div class="quick-card" onclick="ask('What academic qualifications and achievements are mentioned?')">
+          <div class="quick-card-top">
+            <svg viewBox="0 0 24 24"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg>
+            <h4>Academic record</h4>
+          </div>
+          <p>Extract qualifications with grounding scores</p>
+        </div>
+        <div class="quick-card" onclick="ask('What is the capital of France?')">
+          <div class="quick-card-top">
+            <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+            <h4>Refusal test</h4>
+          </div>
+          <p>Out-of-scope question — should refuse</p>
+        </div>
+      </div>
+
+      <!-- Result scroll -->
+      <div class="result-scroll" id="result-area">
+        <div class="empty-state">
+          <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/><line x1="11" y1="8" x2="11" y2="14"/><line x1="8" y1="11" x2="14" y2="11"/></svg>
+          <p>Upload a document and ask a question to see verified answers with claim-level grounding scores</p>
+        </div>
+      </div>
+
+      <!-- Input -->
+      <div class="input-section">
+        <div class="input-wrap">
+          <input type="text" id="query-input" placeholder="Ask a question about your document..." onkeydown="if(event.key==='Enter')sendQuery()">
+          <div class="doc-chip" id="doc-chip" style="display:none;">
+            <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+            <span id="doc-chip-name"></span>
+          </div>
+          <button class="send-btn" id="send-btn" onclick="sendQuery()">
+            <svg viewBox="0 0 24 24"><line x1="12" y1="19" x2="12" y2="5"/><polyline points="5 12 12 5 19 12"/></svg>
+          </button>
+        </div>
+        <div class="input-hint">BM25 + FAISS dual retrieval &nbsp;·&nbsp; Reciprocal Rank Fusion &nbsp;·&nbsp; Claim-level hallucination verification</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+const API = '/v1';
+
+async function checkHealth() {
+  try {
+    const r = await fetch(`${API}/health`, { signal: AbortSignal.timeout(3000) });
+    if (r.ok) {
+      const d = await r.json();
+      setApiStatus('connected', 'API connected', 'localhost:8000');
+      if (d.index_ready) await loadStats();
+      else { document.getElementById('index-card').style.display = 'none'; }
+    }
+  } catch {
+    setApiStatus('error', 'API offline', 'Run: uvicorn backend.api.main:app --reload');
+  }
+}
+
+function setApiStatus(state, label, sub) {
+  const card = document.getElementById('api-card');
+  const dot  = document.getElementById('api-dot');
+  const lbl  = document.getElementById('api-label');
+  const s    = document.getElementById('api-sub');
+  card.className = `status-card ${state === 'connected' ? 'connected' : state === 'loading' ? 'indexed' : 'error'}`;
+  dot.className  = `sc-dot ${state === 'connected' ? 'green' : state === 'loading' ? 'purple' : 'red'}`;
+  lbl.textContent = label;
+  s.textContent   = sub;
+}
+
+async function loadStats() {
+  try {
+    const r = await fetch(`${API}/stats`);
+    const d = await r.json();
+    const ic = document.getElementById('index-card');
+    ic.style.display = 'flex';
+    document.getElementById('index-label').textContent = `${d.chunks_indexed} chunks indexed`;
+    document.getElementById('index-sub').textContent   = d.docs_loaded.join(', ') || 'No documents';
+    if (d.docs_loaded.length > 0) {
+      const name = d.docs_loaded[d.docs_loaded.length - 1];
+      showDocChip(name);
+      renderDocList(d.docs_loaded);
+    }
+  } catch {}
+}
+
+function renderDocList(docs) {
+  document.getElementById('doc-list').innerHTML = docs.map(d =>
+    `<div class="doc-item">
+      <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+      <span>${d}</span>
+    </div>`
+  ).join('');
+}
+
+function showDocChip(name) {
+  const chip = document.getElementById('doc-chip');
+  chip.style.display = 'flex';
+  document.getElementById('doc-chip-name').textContent = name;
+}
+
+async function uploadFile(input) {
+  const file = input.files[0];
+  if (!file) return;
+  setApiStatus('loading', 'Indexing...', file.name);
+  const form = new FormData();
+  form.append('file', file);
+  try {
+    const r = await fetch(`${API}/ingest`, { method: 'POST', body: form });
+    const d = await r.json();
+    if (r.ok) {
+      setApiStatus('connected', 'API connected', 'localhost:8000');
+      document.getElementById('index-card').style.display = 'flex';
+      document.getElementById('index-label').textContent = `${d.total_indexed} chunks indexed`;
+      document.getElementById('index-sub').textContent   = d.doc_name;
+      showDocChip(d.doc_name);
+      renderDocList([d.doc_name]);
+    } else throw new Error(d.detail || 'Upload failed');
+  } catch(e) {
+    setApiStatus('error', 'Upload failed', e.message);
+  }
+}
+
+function ask(q) {
+  document.getElementById('query-input').value = q;
+  sendQuery();
+}
+
+async function sendQuery() {
+  const input = document.getElementById('query-input');
+  const q = input.value.trim();
+  if (!q) return;
+  const btn = document.getElementById('send-btn');
+  btn.disabled = true;
+
+  ['m-score','m-claims','m-grounded','m-latency'].forEach(id => {
+    document.getElementById(id).textContent = '—';
+    document.getElementById(id).className = 'metric-val';
+  });
+
+  document.getElementById('result-area').innerHTML = `
+    <div class="loading-card">
+      <div class="spinner"></div>
+      <div style="font-size:13px;color:var(--text2);margin-bottom:4px;">Processing query</div>
+      <div style="font-size:11px;color:var(--text3);">Retrieving passages · Generating answer · Verifying claims</div>
+    </div>`;
+
+  try {
+    const r = await fetch(`${API}/query`, {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ question: q }),
+    });
+    const d = await r.json();
+    if (!r.ok) throw new Error(d.detail || 'Query failed');
+    renderResult(q, d);
+  } catch(e) {
+    document.getElementById('result-area').innerHTML = `
+      <div class="refused-box">
+        <div class="refused-title">
+          <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+          Error
+        </div>
+        <div class="refused-body">${e.message}</div>
+      </div>`;
+  }
+
+  btn.disabled = false;
+  input.value = '';
+}
+
+function renderResult(question, d) {
+  const score = d.grounding_score;
+  const sc    = score >= 75 ? 'high' : score >= 50 ? 'medium' : 'low';
+  const mc    = score >= 75 ? 'green' : score >= 50 ? 'yellow' : 'red';
+  const grounded = d.claims.filter(c => c.is_grounded).length;
+
+  const ms = document.getElementById('m-score');
+  ms.textContent = score.toFixed(0) + '%'; ms.className = `metric-val ${mc}`;
+  const mc2 = document.getElementById('m-claims');
+  mc2.textContent = d.claims.length; mc2.className = 'metric-val purple';
+  const mg = document.getElementById('m-grounded');
+  mg.textContent = grounded; mg.className = `metric-val ${mc}`;
+  const ml = document.getElementById('m-latency');
+  ml.textContent = d.latency_ms + 'ms'; ml.className = 'metric-val';
+
+  if (d.should_refuse) {
+    document.getElementById('result-area').innerHTML = `
+      <div class="refused-box">
+        <div class="refused-title">
+          <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/></svg>
+          Refused to answer
+        </div>
+        <div class="refused-body">${d.refusal_reason}</div>
+      </div>`;
+    return;
+  }
+
+  const warning = d.warning ? `
+    <div class="warning-bar">
+      <svg viewBox="0 0 24 24"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+      ${d.warning}
+    </div>` : '';
+
+  const badgeCls = d.is_reliable ? 'reliable' : 'unreliable';
+  const badgeTxt = d.is_reliable ? 'Reliable' : 'Low confidence';
+
+  const claimsHtml = d.claims.map(c => {
+    const cls  = c.is_grounded ? 'grounded' : c.confidence > 0.3 ? 'uncertain' : 'ungrounded';
+    const icls = c.is_grounded ? 'claim-grounded-icon' : c.confidence > 0.3 ? 'claim-uncertain-icon' : 'claim-ungrounded-icon';
+    const icon = c.is_grounded
+      ? `<svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>`
+      : c.confidence > 0.3
+      ? `<svg viewBox="0 0 24 24"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>`
+      : `<svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>`;
+    const sup = c.is_grounded && c.supporting_text
+      ? `<div class="claim-support">"${c.supporting_text.slice(0,90)}..."</div>`
+      : !c.is_grounded
+      ? `<div class="claim-support">${c.reason}</div>` : '';
+    return `<div class="claim ${cls}"><div class="claim-icon ${icls}">${icon}</div><div>${c.claim}${sup}</div></div>`;
+  }).join('');
+
+  const sourcesHtml = d.sources.map(s => {
+    const pct = (s.score * 100).toFixed(0);
+    const col = s.score > 0.75 ? 'var(--green)' : s.score > 0.5 ? 'var(--yellow)' : 'var(--text3)';
+    return `<div class="source-row">
+      <div class="source-doc">${s.doc_name}</div>
+      <div class="source-page">p. ${s.page}</div>
+      <div class="source-score" style="color:${col}">${pct}%</div>
+      <div class="source-preview">${s.preview}</div>
+    </div>`;
+  }).join('');
+
+  document.getElementById('result-area').innerHTML = `
+    ${warning}
+    <div class="answer-card">
+      <div class="answer-header">
+        <div class="answer-title">Answer</div>
+        <div class="answer-meta">
+          <div class="score-pill">
+            <div class="score-bar"><div class="score-fill ${sc}" style="width:${score}%"></div></div>
+            <span class="score-text ${sc}">${score.toFixed(0)}%</span>
+          </div>
+          <span class="badge ${badgeCls}">${badgeTxt}</span>
+        </div>
+      </div>
+      <div class="answer-body">${d.answer}</div>
+      <div class="claims-title">Claim-level verification</div>
+      ${claimsHtml}
+      <div class="sources-section">
+        <div class="sources-header">
+          <div class="sources-title-txt">Retrieved sources</div>
+        </div>
+        <div class="sources-table">
+          <div class="sources-thead">
+            <div>Document</div><div>Page</div><div>Relevance</div><div>Preview</div>
+          </div>
+          ${sourcesHtml}
+        </div>
+      </div>
+    </div>`;
+}
+
+checkHealth();
+setInterval(checkHealth, 10000);
+</script>
+</body>
+</html>
