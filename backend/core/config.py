@@ -30,7 +30,7 @@ class Config:
 
     # ── Hallucination detection ──────────────────────────────
     GROUNDING_THRESHOLD: float = 0.60  # Below this → flag as low-confidence
-    REFUSAL_SIMILARITY_THRESHOLD: float = 0.30  # Below this → refuse (cosine sim)
+    REFUSAL_SIMILARITY_THRESHOLD: float = 0.15  # Below this → refuse (cosine sim)
     VERIFICATION_BATCH_SIZE: int = 5   # Claims verified per LLM call
 
     # ── Embeddings ───────────────────────────────────────────

@@ -224,6 +224,16 @@ Hallucinating an answer is worse than saying "I don't know." The refusal thresho
 
 ---
 
+## Demo
+
+<img src="assests/v1.gif" width="700" 
+  alt="VerifAI Demo 01"/>
+
+<img src="assests/v2.gif" width="700" 
+  alt="VerifAI Demo 02"/>
+
+---
+
 ## What I'd add next
 
 - **Re-ranking** — CrossEncoder re-ranker before generation (reduces false retrievals)
